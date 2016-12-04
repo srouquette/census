@@ -1,0 +1,32 @@
+<html>
+<head>
+    <base href="/">
+    <title>Census</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-smart-table/2.1.8/smart-table.js"></script>
+    <script src="app.js"></script>
+    <script src="services/data.service.js"></script>
+    <script src="services/config.service.js"></script>
+    <script src="controllers/app.controller.js"></script>
+    <style>
+        .container {
+            width: 50%;
+            min-width: 600px;
+        }
+        .st-sort-ascent:before{
+            content: '\25B2';
+        }
+        .st-sort-descent:before{
+            content: '\25BC';
+        }
+</style>
+</head>
+
+<body>
+<div ng-app="app" class="container">
+    <div ng-view></div>
+</div>
+</body>
+</html>

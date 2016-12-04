@@ -1,0 +1,23 @@
+<div class="form-group">
+    <label for="selectedColumn">Select a column: </label>
+    <select id="selectedColumn" class="form-control" ng-model="selectedColumn" ng-options="c for c in columns" ng-change="setSelectedColumn(selectedColumn)"></select>
+
+    <table st-table="displayedData" st-safe-src="data" class="table table-striped">
+        <thead>
+            <tr>
+                <th st-sort="value">Column value</th>
+                <th st-sort="count">Population count</th>
+                <th st-sort="average">Average {{getAverageColumnName()}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in displayedData">
+                <td>{{ row.value }}</td>
+                <td>{{ row.count }}</td>
+                <td>{{ row.average | number: 2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btn btn-primary btn-block" ng-click="downloadMore()" ng-disabled="!moreAvailable">click to download more</button>
+</div>
