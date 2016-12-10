@@ -1,6 +1,6 @@
 <div class="form-group">
     <label for="selectedColumn">Select a column: </label>
-    <select id="selectedColumn" class="form-control" ng-model="selectedColumn" ng-options="c for c in columns" ng-change="setSelectedColumn(selectedColumn)"></select>
+    <select id="selectedColumn" class="form-control" ng-model="selectedColumn" ng-options="c for c in columns"></select>
 
     <table st-table="displayedData" st-safe-src="data" class="table table-striped">
         <thead>

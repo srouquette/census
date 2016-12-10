@@ -35,15 +35,7 @@ function($scope, $routeParams, $route, $location, configService, dataService) {
         $scope.moreAvailable = data.length >= configService.getNbEntries();
     };
 
-    dataService.getColumns()
-        .then(function(res) {
-            $scope.columns = res.data;
-            $scope.setSelectedColumn($routeParams.column || $scope.columns[0]);
-        }, function(err) {
-            console.error(err);
-        });
-
-    $scope.setSelectedColumn = function(column) {
+    var setSelectedColumn = function(column) {
         if (!$scope.columns) {
             return;
         }
@@ -87,4 +79,19 @@ function($scope, $routeParams, $route, $location, configService, dataService) {
     $scope.getAverageColumnName = function() {
         return configService.getColumnToAverage();
     };
+
+    $scope.$watch('selectedColumn', function(newValue, oldValue) {
+        if (newValue !== oldValue) {
+            setSelectedColumn(newValue);
+        }
+    })
+
+    // init columns and selectColumn
+    dataService.getColumns()
+        .then(function(res) {
+            $scope.columns = res.data;
+            $scope.selectedColumn = $routeParams.column || $scope.columns[0];
+        }, function(err) {
+            console.error(err);
+        });
 }]);
