@@ -41,6 +41,7 @@ public class CensusRestController {
     public List<CensusResult> getAverage(@PathVariable @ValidColumn String column,
                                          @RequestParam(defaultValue = "0") @ValidOffset Integer offset) throws FormatException {
         return censusDao.getAverage(column, offset);
+        //return censusDao.getAverageWithNamedParameters(column, offset);
     }
 
     @RequestMapping(path="/config")

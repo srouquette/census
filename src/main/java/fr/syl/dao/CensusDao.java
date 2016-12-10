@@ -7,6 +7,7 @@ import fr.syl.model.CensusResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSetMetaData;
@@ -22,6 +23,8 @@ public class CensusDao {
     private AppConfig config;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private NamedParameterJdbcTemplate namedJdbcTemplate;
 
     /**
      * @return an immutable set of the column names
@@ -62,5 +65,53 @@ public class CensusDao {
                 "SELECT `%s` AS value, COUNT(*) AS count, AVG(%s) AS average FROM `%s`WHERE value IS NOT NULL AND `%s` IS NOT NULL GROUP BY value ORDER BY %s DESC LIMIT %d OFFSET %d",
                 column, config.getColumnToAverage(), config.getTableName(), config.getColumnToAverage(), config.getOrderBy(), config.getNbEntries(), offset),
                 new BeanPropertyRowMapper<>(CensusResult.class));
+    }
+
+    /**
+     * named parameters don't seem to work with SQLite driver...
+     * I also tested it with "?"
+     * But we can see that by using a SqlParameterSource, the query gets replaced by "?", and still fails with an Exception.
+     * @param column column to group the result by
+     * @param offset offset to start
+     * @return a list of {@link CensusResult} containing the average age based on the column used to group the elements
+     * @throws FormatException
+     */
+    public List<CensusResult> getAverageWithNamedParameters(String column, int offset) throws FormatException {
+        if (!getColumns().contains(column)) {
+            throw new FormatException("column not found");
+        }
+        SqlParameterSource parameters = new GetAverageSqlParameterSource(config, column, offset);
+        return namedJdbcTemplate.query(
+                "SELECT :column AS value, COUNT(*) AS count, AVG(:columnToAverage) AS average FROM :tableName WHERE value IS NOT NULL AND :columnToAverage IS NOT NULL GROUP BY value ORDER BY :orderBy DESC LIMIT :nbEntries OFFSET :offset",
+                parameters,
+                new BeanPropertyRowMapper<>(CensusResult.class));
+    }
+
+    private static class GetAverageSqlParameterSource extends AbstractSqlParameterSource {
+        private final SqlParameterSource configParameters;
+        private final SqlParameterSource inputParameters;
+
+        GetAverageSqlParameterSource(AppConfig config, String column, int offset) {
+            configParameters = new BeanPropertySqlParameterSource(config);
+            inputParameters  = new MapSqlParameterSource() {{
+                addValue("column", column);
+                addValue("offset", offset);
+            }};
+        }
+
+        @Override
+        public boolean hasValue(String paramName) {
+            return configParameters.hasValue(paramName) || inputParameters.hasValue(paramName);
+        }
+
+        @Override
+        public Object getValue(String paramName) throws IllegalArgumentException {
+            return configParameters.hasValue(paramName)  ? configParameters.getValue(paramName) : inputParameters.getValue(paramName);
+        }
+
+        @Override
+        public int getSqlType(String paramName) throws IllegalArgumentException {
+            return configParameters.hasValue(paramName)  ? configParameters.getSqlType(paramName) : inputParameters.getSqlType(paramName);
+        }
     }
 }
